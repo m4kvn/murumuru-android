@@ -1,15 +1,14 @@
 package com.m4kvn.murumuru.ui.main
 
-import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Observer
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
 import android.view.View
 import com.m4kvn.murumuru.R
 import com.m4kvn.murumuru.core.BaseFragment
 import com.m4kvn.murumuru.databinding.FragmentHomeBinding
-import com.m4kvn.murumuru.model.SampleMusic
 import com.m4kvn.murumuru.ui.MainViewModel
+import com.m4kvn.murumuru.ui.binder.SectionTitleBinder
 import com.m4kvn.murumuru.ui.detail.DetailFragment
 import com.m4kvn.murumuru.ui.main.binder.NewItemBinder
 import jp.satorufujiwara.binder.recycler.RecyclerBinderAdapter
@@ -28,19 +27,36 @@ class HomeFragment : BaseFragment<MainViewModel, FragmentHomeBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d("HomeFragment", "onViewCreated")
-        adapter.clear()
+
         binding.viewModel = viewModel
         binding.recyclerView.layoutManager = LinearLayoutManager(activity)
         binding.recyclerView.adapter = adapter
 
-        if (adapter.isEmpty(HomeSection.NEW)) {
-            Log.d("HomeFragment", "adapter.isEmpty(HomeSection.New)")
-            adapter.add(HomeSection.NEW, NewItemBinder(activity,
-                    SampleMusic(title = MutableLiveData<String>().apply { value = "Hello" }), {
-                viewModel.requestToChangeFragment(
-                        DetailFragment.newInstance(), isBackStack = true)
-            }))
+        binding.swipeRefreshLayout.apply {
+            setOnRefreshListener {
+                viewModel.updateSampleMusics { isRefreshing = false }
+            }
+        }
+
+        if (adapter.isEmpty(HomeSection.NEW_TITLE)) {
+            adapter.add(HomeSection.NEW_TITLE,
+                    SectionTitleBinder(activity,
+                            "新着", HomeViewType.SECTION_TITLE))
+        }
+
+        if (adapter.isEmpty(HomeSection.SAMPLES)) {
+            viewModel.sampleMusics.observe(this, Observer {
+                it ?: return@Observer
+                adapter.removeAll(HomeSection.SAMPLES)
+                adapter.addAll(HomeSection.SAMPLES, it.map {
+                    NewItemBinder(activity, it, onDetailClick = {
+                        viewModel.requestToChangeFragment(
+                                DetailFragment.newInstance(), isBackStack = true)
+                    }, onViewClick = {
+                        // TODO: 音声を再生する
+                    })
+                })
+            })
         }
     }
 
@@ -48,27 +64,4 @@ class HomeFragment : BaseFragment<MainViewModel, FragmentHomeBinding>() {
         adapter.clear()
         super.onDestroy()
     }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
-//        Log.d("HomeFragment", "onActivityCreated: " +
-//                "newSampleMusics=${viewModel.getNewSampleMusics()
-//                        .map { createNewItemBinder(it) }}")
-//
-//        adapter.clear()
-//
-//        adapter.insertAll(HomeSection.NEW, viewModel.getNewSampleMusics()
-//                .map { createNewItemBinder(it) }, 0)
-//
-//        viewModel.newSampleMusicsObserveForever {
-//            adapter.insertAll(HomeSection.NEW,
-//                    it.map { createNewItemBinder(it) }, 0)
-//        }
-    }
-
-    private fun createNewItemBinder(sampleMusic: SampleMusic) =
-            NewItemBinder(activity, sampleMusic, clickListener = {
-                viewModel.requestToChangeFragment(DetailFragment.newInstance(), isBackStack = true)
-            })
 }

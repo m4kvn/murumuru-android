@@ -3,7 +3,6 @@ package com.m4kvn.murumuru.cache.entity
 import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
 import android.arch.persistence.room.PrimaryKey
-import com.m4kvn.murumuru.model.SampleMusic
 
 @Entity
 data class SampleMusicEntity(
@@ -15,14 +14,6 @@ data class SampleMusicEntity(
         @ColumnInfo(name = "user_id") val userId: String?
 ) {
     companion object {
-
-        fun fromSampleMusic(sampleMusic: SampleMusic) = SampleMusicEntity(
-                title = sampleMusic.title.value,
-                isR18 = if (sampleMusic.isR18.value == true) 1L else 0L,
-                uploadTime = sampleMusic.uploadTime.value,
-                url = sampleMusic.url.value,
-                userId = sampleMusic.userId.value
-        )
 
         fun fromFireStore(data: Map<String, Any>) = SampleMusicEntity(
                 title = data["title"] as String,

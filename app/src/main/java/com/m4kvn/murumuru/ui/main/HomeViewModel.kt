@@ -22,7 +22,7 @@ class HomeViewModel @Inject constructor() : ViewModel() {
             sampleMusicDao.findAll().observeForever {
                 it ?: return@observeForever
                 Log.d("HomeViewModel", "findAll: $it")
-                this.value = it.map { SampleMusic.fromCache(it) }
+//                this.value = it.map { SampleMusic.fromCache(it) }
             }
             firebaseFirestoreRepository
                     .sampleMusicCollectionRef.get()
