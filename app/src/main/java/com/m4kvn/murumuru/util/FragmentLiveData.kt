@@ -35,4 +35,9 @@ class FragmentLiveData :
     override fun setValue(value: Pair<Fragment, Boolean>?) {
         currentFragment.value = value
     }
+
+    fun changeCurrentFragment(fragment: Fragment) {
+        currentFragmentClass = fragment::class.java
+        currentFragment.postValue(fragment to false)
+    }
 }

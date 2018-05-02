@@ -16,7 +16,7 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.currentFragment.observe(this,
+        viewModel.requestToChangeFragment.observe(this,
                 HomeFragment.newInstance(), Observer {
             it?.let { replaceFragment(R.id.container, it.first, it.second) }
         })

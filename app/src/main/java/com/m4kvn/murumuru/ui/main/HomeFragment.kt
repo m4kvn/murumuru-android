@@ -29,7 +29,7 @@ class HomeFragment : BaseFragment<MainViewModel, FragmentHomeBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d("HomeFragment", "onViewCreated")
-
+        adapter.clear()
         binding.viewModel = viewModel
         binding.recyclerView.layoutManager = LinearLayoutManager(activity)
         binding.recyclerView.adapter = adapter
@@ -38,7 +38,8 @@ class HomeFragment : BaseFragment<MainViewModel, FragmentHomeBinding>() {
             Log.d("HomeFragment", "adapter.isEmpty(HomeSection.New)")
             adapter.add(HomeSection.NEW, NewItemBinder(activity,
                     SampleMusic(title = MutableLiveData<String>().apply { value = "Hello" }), {
-                viewModel.changeFragment(DetailFragment.newInstance(), isBackStack = true)
+                viewModel.requestToChangeFragment(
+                        DetailFragment.newInstance(), isBackStack = true)
             }))
         }
     }
@@ -68,6 +69,6 @@ class HomeFragment : BaseFragment<MainViewModel, FragmentHomeBinding>() {
 
     private fun createNewItemBinder(sampleMusic: SampleMusic) =
             NewItemBinder(activity, sampleMusic, clickListener = {
-                viewModel.changeFragment(DetailFragment.newInstance(), isBackStack = true)
+                viewModel.requestToChangeFragment(DetailFragment.newInstance(), isBackStack = true)
             })
 }
