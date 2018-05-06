@@ -11,6 +11,7 @@ import javax.inject.Singleton
 @Component(modules = [
     AndroidSupportInjectionModule::class,
     AppModule::class,
+    ServiceBuilder::class,
     ActivityBuilder::class,
     FragmentBuilder::class])
 interface AppComponent : AndroidInjector<MurumuruApp> {

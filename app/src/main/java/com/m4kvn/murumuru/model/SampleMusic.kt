@@ -1,5 +1,11 @@
 package com.m4kvn.murumuru.model
 
+import android.net.Uri
+import android.os.Bundle
+import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaDescriptionCompat
+import java.util.*
+
 data class SampleMusic(
         val title: String,
         val isR18: Boolean,
@@ -18,4 +24,15 @@ data class SampleMusic(
                 userId = data["user_id"] as String
         )
     }
+
+    fun toMediaItem(uuid: UUID, index: Int) = MediaBrowserCompat
+            .MediaItem(toMediaDescriptionCompat(uuid, index),
+                    MediaBrowserCompat.MediaItem.FLAG_PLAYABLE)
+
+    private fun toMediaDescriptionCompat(uuid: UUID, index: Int) = MediaDescriptionCompat.Builder()
+            .setMediaId(uuid.toString())
+            .setMediaUri(Uri.parse(url))
+            .setTitle(title)
+            .setExtras(Bundle().apply { putInt("index", index) })
+            .build()
 }

@@ -3,14 +3,14 @@ package com.m4kvn.murumuru.ui.main
 import android.arch.lifecycle.Observer
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.view.View
 import com.m4kvn.murumuru.R
 import com.m4kvn.murumuru.core.BaseFragment
 import com.m4kvn.murumuru.databinding.FragmentHomeBinding
 import com.m4kvn.murumuru.ui.MainViewModel
 import com.m4kvn.murumuru.ui.binder.SectionTitleBinder
-import com.m4kvn.murumuru.ui.detail.DetailFragment
-import com.m4kvn.murumuru.ui.main.binder.NewItemBinder
+import com.m4kvn.murumuru.ui.main.binder.MusicItemBinder
 import jp.satorufujiwara.binder.recycler.RecyclerBinderAdapter
 
 class HomeFragment : BaseFragment<MainViewModel, FragmentHomeBinding>() {
@@ -45,19 +45,29 @@ class HomeFragment : BaseFragment<MainViewModel, FragmentHomeBinding>() {
         }
 
         if (adapter.isEmpty(HomeSection.SAMPLES)) {
-            viewModel.sampleMusics.observe(this, Observer {
+            viewModel.mediaItems.observe(this, Observer {
                 it ?: return@Observer
+                Log.d("HomeFragment", "mediaItems.observe=$it")
                 adapter.removeAll(HomeSection.SAMPLES)
-                adapter.addAll(HomeSection.SAMPLES, it.map {
-                    NewItemBinder(activity, it, onDetailClick = {
-                        viewModel.requestToChangeFragment(
-                                DetailFragment.newInstance(), isBackStack = true)
-                    }, onViewClick = {
-                        // TODO: 音声を再生する
-                    })
+                adapter.addAll(HomeSection.SAMPLES, it.map { mediaItem ->
+                    MusicItemBinder(activity, mediaItem,
+                            onDetailClick = { viewModel.openDetail(mediaItem) },
+                            onViewClick = { viewModel.playSample(mediaItem) })
                 })
             })
         }
+//        if (adapter.isEmpty(HomeSection.SAMPLES)) {
+//            viewModel.sampleMusics.observe(this, Observer {
+//                it ?: return@Observer
+//                Log.d("HomeFragment", "sampleMusic.observe=$it")
+//                adapter.removeAll(HomeSection.SAMPLES)
+//                adapter.addAll(HomeSection.SAMPLES, it.map { sampleMusic ->
+//                    NewItemBinder(activity, sampleMusic,
+//                            onDetailClick = { viewModel.openDetail(sampleMusic) },
+//                            onViewClick = { viewModel.playSample(sampleMusic) })
+//                })
+//            })
+//        }
     }
 
     override fun onDestroy() {
