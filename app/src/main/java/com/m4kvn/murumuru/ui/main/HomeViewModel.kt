@@ -22,7 +22,6 @@ class HomeViewModel @Inject constructor() : ViewModel() {
             sampleMusicDao.findAll().observeForever {
                 it ?: return@observeForever
                 Log.d("HomeViewModel", "findAll: $it")
-//                this.value = it.map { SampleMusic.fromCache(it) }
             }
             firebaseFirestoreRepository
                     .sampleMusicCollectionRef.get()
@@ -33,22 +32,6 @@ class HomeViewModel @Inject constructor() : ViewModel() {
                                 .filter { it.data != null }
                                 .map { SampleMusicEntity.fromFireStore(it.data!!) })
                     }
-//            firebaseFirestoreRepository
-//                    .sampleMusicCollectionRef
-//                    .orderBy("upload_time", Query.Direction.DESCENDING)
-//                    .addSnapshotListener { snapshot, _ ->
-//                        snapshot ?: return@addSnapshotListener
-//                        appDatabase.beginTransaction()
-//                        try {
-//                            appDatabase.getSampleMusicDao().removeAll()
-//                            appDatabase.getSampleMusicDao().insertAll()
-//                            appDatabase.setTransactionSuccessful()
-//                        } finally {
-//                            appDatabase.endTransaction()
-//                        }
-//                        this.value = snapshot.documentChanges
-//                                .map { SampleMusic.fromFireStore(it.document) }
-//                    }
         }
     }
 

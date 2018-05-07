@@ -6,6 +6,7 @@ import android.content.Intent
 import android.media.AudioManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.media.MediaBrowserCompat.MediaItem
@@ -28,6 +29,7 @@ import com.google.android.exoplayer2.upstream.DataSource
 import com.google.firebase.firestore.Query
 import com.m4kvn.murumuru.ext.*
 import com.m4kvn.murumuru.model.SampleMusic
+import com.m4kvn.murumuru.repository.FirebaseAuthRepository
 import com.m4kvn.murumuru.repository.FirebaseFirestoreRepository
 import com.m4kvn.murumuru.ui.MainActivity
 import dagger.android.AndroidInjection
@@ -48,7 +50,10 @@ class MusicService : MediaBrowserServiceCompat() {
     lateinit var dataSourceFactory: DataSource.Factory
     @Inject
     lateinit var firestoreRepository: FirebaseFirestoreRepository
+    @Inject
+    lateinit var firebaseAuthRepository: FirebaseAuthRepository
 
+    private var handler: Handler? = null
     private val mediaSession: MediaSessionCompat by lazy {
         MediaSessionCompat(applicationContext, TAG)
     }
@@ -171,6 +176,25 @@ class MusicService : MediaBrowserServiceCompat() {
                         "manifest=$manifest)")
             }
         })
+
+        if (handler == null) {
+            handler = Handler()
+            handler?.postDelayed(object : Runnable {
+                override fun run() {
+                    if (exoPlayer.playWhenReady) {
+                        updatePlaybackState(
+                                exoPlayer.playWhenReady,
+                                exoPlayer.playbackState)
+                        if (exoPlayer.duration > 0L) {
+                            if (exoPlayer.currentPosition >= exoPlayer.duration) {
+                                mediaSession.controller.transportControls.skipToNext()
+                            }
+                        }
+                    }
+                    handler?.postDelayed(this, 500)
+                }
+            }, 500)
+        }
     }
 
     override fun onLoadChildren(
@@ -178,19 +202,19 @@ class MusicService : MediaBrowserServiceCompat() {
             result: Result<MutableList<MediaItem>>) {
         if (parentId == ROOT_ID) {
             result.detach()
-            firestoreRepository.sampleMusicCollectionRef
-                    .orderBy("upload_time", Query.Direction.DESCENDING)
-                    .get().addOnCompleteListener {
-                        it.result.documents
-                                .filter { it.data != null }
-                                .map { SampleMusic.fromFireStore(it.data!!) }
-                                .apply { items.clear() }
-                                .forEachIndexed { i, sampleMusic ->
-                                    items[i] = sampleMusic.toMediaItem(UUID.randomUUID(), i)
-                                }
-                        result.sendResult(mutableListOf<MediaItem>()
-                                .apply { items.forEach { add(it.value) } })
-                    }
+            if (firebaseAuthRepository.isSignIn()) {
+                val uid = firebaseAuthRepository.getCurrentUser()?.uid
+                if (uid != null) {
+                    firestoreRepository.usersCollectionRef
+                            .document(uid)
+                            .get().addOnCompleteListener {
+                                sendSampleList(result,
+                                        (it.result.data?.get("is_ero") as Long) != 0L)
+                            }
+                }
+            } else {
+                sendSampleList(result, false)
+            }
         } else {
             result.sendResult(ArrayList())
         }
@@ -201,6 +225,7 @@ class MusicService : MediaBrowserServiceCompat() {
 
     override fun onDestroy() {
         super.onDestroy()
+        handler = null
         mediaSession.isActive = false
         mediaSession.release()
         exoPlayer.stop()
@@ -231,7 +256,7 @@ class MusicService : MediaBrowserServiceCompat() {
         if (mediaSession.controller.metadata == null
                 && !mediaSession.isActive) return
 
-        val description =  playingItem?.description ?: return
+        val description = playingItem?.description ?: return
 
         startForeground(1, NotificationCompat
                 .Builder(applicationContext, "murumuru")
@@ -282,5 +307,27 @@ class MusicService : MediaBrowserServiceCompat() {
                 != PlaybackStateCompat.STATE_PLAYING) {
             stopForeground(false)
         }
+    }
+
+    private fun sendSampleList(result: Result<MutableList<MediaItem>>, isEro: Boolean) {
+        firestoreRepository.sampleMusicCollectionRef
+                .orderBy("upload_time", Query.Direction.DESCENDING)
+                .get().addOnCompleteListener {
+                    mediaSession.controller.transportControls.stop()
+                    it.result.documents
+                            .filter { it.data != null }
+                            .map { SampleMusic.fromFireStore(it.data!!) }
+                            .filter {
+                                if (!firebaseAuthRepository.isSignIn()) !it.isR18
+                                else if (isEro) true
+                                else !it.isR18
+                            }
+                            .apply { items.clear() }
+                            .forEachIndexed { i, sampleMusic ->
+                                items[i] = sampleMusic.toMediaItem(UUID.randomUUID(), i)
+                            }
+                    result.sendResult(mutableListOf<MediaItem>()
+                            .apply { items.forEach { add(it.value) } })
+                }
     }
 }

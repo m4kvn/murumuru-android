@@ -5,4 +5,9 @@ import javax.inject.Inject
 
 class FirebaseAuthRepository @Inject constructor(
         private val firebaseAuth: FirebaseAuth
-)
+) {
+
+    fun getCurrentUser() = firebaseAuth.currentUser
+
+    fun isSignIn() = firebaseAuth.currentUser != null
+}

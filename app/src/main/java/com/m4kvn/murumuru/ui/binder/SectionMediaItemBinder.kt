@@ -1,4 +1,4 @@
-package com.m4kvn.murumuru.ui.main.binder
+package com.m4kvn.murumuru.ui.binder
 
 import android.app.Activity
 import android.databinding.DataBindingUtil
@@ -8,15 +8,16 @@ import android.view.View
 import com.m4kvn.murumuru.MEDIA_ITEM_IS_R18
 import com.m4kvn.murumuru.R
 import com.m4kvn.murumuru.databinding.ViewNewItemBinding
-import com.m4kvn.murumuru.ui.main.HomeViewType
+import jp.satorufujiwara.binder.ViewType
 import jp.satorufujiwara.binder.recycler.RecyclerBinder
 
-class MusicItemBinder(
+class SectionMediaItemBinder<V : ViewType>(
         activity: Activity?,
+        viewType: V,
         private val mediaItem: MediaBrowserCompat.MediaItem,
         private val onDetailClick: (view: View) -> Unit = {},
         private val onViewClick: (view: View) -> Unit = {}
-) : RecyclerBinder<HomeViewType>(activity, HomeViewType.ITEM) {
+) : RecyclerBinder<V>(activity, viewType) {
 
     override fun layoutResId() = R.layout.view_new_item
 

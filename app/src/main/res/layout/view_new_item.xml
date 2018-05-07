@@ -11,7 +11,10 @@
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="8dp">
+            android:paddingBottom="8dp"
+            android:paddingEnd="4dp"
+            android:paddingStart="8dp"
+            android:paddingTop="8dp">
 
             <TextView
                 android:id="@+id/textView"
@@ -20,21 +23,36 @@
                 android:ellipsize="end"
                 android:singleLine="true"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/detailImageView"
+                app:layout_constraintEnd_toStartOf="@id/imageViewContainer"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="タイトル" />
 
-            <ImageView
-                android:id="@+id/detailImageView"
+            <LinearLayout
+                android:id="@+id/imageViewContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_more_vert_black_24dp"
+                android:orientation="horizontal"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/textView"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="ContentDescription" />
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/r18ImageView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_verified_user_black_24dp"
+                    tools:ignore="ContentDescription" />
+
+                <ImageView
+                    android:id="@+id/detailImageView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_more_vert_black_24dp"
+                    tools:ignore="ContentDescription" />
+
+            </LinearLayout>
 
         </android.support.constraint.ConstraintLayout>
 

@@ -56,18 +56,6 @@ class HomeFragment : BaseFragment<MainViewModel, FragmentHomeBinding>() {
                 })
             })
         }
-//        if (adapter.isEmpty(HomeSection.SAMPLES)) {
-//            viewModel.sampleMusics.observe(this, Observer {
-//                it ?: return@Observer
-//                Log.d("HomeFragment", "sampleMusic.observe=$it")
-//                adapter.removeAll(HomeSection.SAMPLES)
-//                adapter.addAll(HomeSection.SAMPLES, it.map { sampleMusic ->
-//                    NewItemBinder(activity, sampleMusic,
-//                            onDetailClick = { viewModel.openDetail(sampleMusic) },
-//                            onViewClick = { viewModel.playSample(sampleMusic) })
-//                })
-//            })
-//        }
     }
 
     override fun onDestroy() {

@@ -4,6 +4,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
+import com.m4kvn.murumuru.MEDIA_ITEM_INDEX
+import com.m4kvn.murumuru.MEDIA_ITEM_IS_R18
 import java.util.*
 
 data class SampleMusic(
@@ -33,6 +35,9 @@ data class SampleMusic(
             .setMediaId(uuid.toString())
             .setMediaUri(Uri.parse(url))
             .setTitle(title)
-            .setExtras(Bundle().apply { putInt("index", index) })
+            .setExtras(Bundle().apply {
+                putInt(MEDIA_ITEM_INDEX, index)
+                putBoolean(MEDIA_ITEM_IS_R18, isR18)
+            })
             .build()
 }
